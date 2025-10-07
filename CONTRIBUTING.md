@@ -18,23 +18,24 @@ Thanks for considering contributing to agentic-backend! We appreciate help from 
 
 Local development (FastAPI)
 
-- Install dependencies (this project uses Poetry in the repository; if you use `uv` as a package manager, adapt accordingly):
+-   Install dependencies (this project uses Poetry in the repository; if you use `uv` as a package manager, adapt accordingly):
 
 ```powershell
 poetry install
 ```
 
-- Run the server locally with uvicorn:
+-   Run the server locally with uvicorn:
 
 ```powershell
 poetry run uvicorn app.main:app --reload --port 8080
 ```
 
-- Run tests:
+-   Run tests:
 
 ```powershell
 poetry run pytest -q
 ```
+
 5. Open a Pull Request describing your changes.
 
 ## Pull request guidelines

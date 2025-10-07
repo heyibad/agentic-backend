@@ -25,6 +25,6 @@ async def run():
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     code = asyncio.run(run())
     sys.exit(code)
