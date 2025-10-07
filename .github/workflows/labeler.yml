@@ -1,0 +1,23 @@
+name: "Apply labels"
+
+on:
+    pull_request:
+        types: [opened, edited]
+
+jobs:
+    label:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Label PR based on files changed
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const pr = context.payload.pull_request;
+                      const files = await github.pulls.listFiles({owner: context.repo.owner, repo: context.repo.repo, pull_number: pr.number});
+                      const labels = new Set();
+                      files.data.forEach(f => {
+                        if (f.filename.startsWith('docs/')) labels.add('docs');
+                        if (f.filename.endsWith('.md')) labels.add('documentation');
+                      });
+                      if (labels.size) await github.issues.addLabels({owner: context.repo.owner, repo: context.repo.repo, issue_number: pr.number, labels: Array.from(labels)});
