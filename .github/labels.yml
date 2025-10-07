@@ -10,3 +10,7 @@
   color: a2eeef
 - name: security
   color: cfd3d7
+ - name: hacktoberfest-accepted
+   color: 5319e7
+ - name: hacktoberfest
+   color: ff7f50

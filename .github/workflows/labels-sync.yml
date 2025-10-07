@@ -1,0 +1,18 @@
+name: Sync labels from labels.yml
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Sync labels
+        uses: actions-ecosystem/action-create-release@v1
+        with:
+          # This step is a placeholder. You can replace it with a label-sync action such as "marocchino/sticky-labels" or create a small script.
+          # The repo has a `.github/labels.yml` file. Maintain this file and run this workflow manually to sync labels.
+          args: 'noop'

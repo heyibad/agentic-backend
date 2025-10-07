@@ -15,6 +15,26 @@ Thanks for considering contributing to agentic-backend! We appreciate help from 
 2. Create a branch: `git checkout -b my-feature`.
 3. Make your changes, add tests if applicable.
 4. Run tests and format code (see project-specific commands).
+
+Local development (FastAPI)
+
+- Install dependencies (this project uses Poetry in the repository; if you use `uv` as a package manager, adapt accordingly):
+
+```powershell
+poetry install
+```
+
+- Run the server locally with uvicorn:
+
+```powershell
+poetry run uvicorn app.main:app --reload --port 8080
+```
+
+- Run tests:
+
+```powershell
+poetry run pytest -q
+```
 5. Open a Pull Request describing your changes.
 
 ## Pull request guidelines
