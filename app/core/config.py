@@ -8,34 +8,54 @@ from sqlmodel import Field
 
 class Settings(BaseSettings):
     # App Settings
-    app_name: str = "FastAPI Auth Backend"
+    app_name: str = "FastAPI Agentic Backend"
     version: str = "0.1.0"
     environment: str = Field(default="development", alias="ENVIRONMENT")
     # Database - PostgreSQL
-    database_url: Optional[str] = None
+    database_url: Optional[str] = Field(default=None, alias="DATABASE_URL")
 
     # JWT
-    secret_key: str = "your-secret-key-change-this-in-production"
-    algorithm: str = "HS256"
-    access_token_expire_minutes: int = 30
+    secret_key: str = Field(
+        default="your-secret-key-change-this-in-production", alias="JWT_SECRET"
+    )
+    algorithm: str = Field(default="HS256", alias="JWT_ALGORITHM")
+    access_token_expire_minutes: int = Field(
+        default=30, alias="ACCESS_TOKEN_EXPIRE_MINUTES"
+    )
+    refresh_token_expire_days: int = Field(default=7, alias="REFRESH_TOKEN_EXPIRE_DAYS")
 
     # Google OAuth
-    google_client_id: Optional[str] = None
-    google_client_secret: Optional[str] = None
-    google_redirect_uri: str = "http://localhost:3000/auth/google/callback"
+    google_client_id: Optional[str] = Field(default=None, alias="GOOGLE_CLIENT_ID")
+    google_client_secret: Optional[str] = Field(
+        default=None, alias="GOOGLE_CLIENT_SECRET"
+    )
+    google_redirect_uri: str = Field(
+        default="http://localhost:8080/api/v1/oauth/google/callback",
+        alias="GOOGLE_REDIRECT_URI",
+    )
 
-    # OpenAI/Gemini
-    gemini_api_key: Optional[str] = None
-    base_url: str = "https://gemini.googleapis.com/v1/"
-    model: str = "gemini-2.5-flash"
+    # Gemini AI (Google's AI)
+    gemini_api_key: Optional[str] = Field(default=None, alias="GEMINI_API_KEY")
+    gemini_base_url: str = Field(
+        default="https://generativelanguage.googleapis.com/v1beta/openai/",
+        alias="GEMINI_BASE_URL",
+    )
+    gemini_model: str = Field(default="gemini-2.5-flash", alias="GEMINI_MODEL")
 
     # CORS
-    allowed_origins: list = ["http://localhost:3000", "http://localhost:8080"]
+    allowed_origins: str = Field(
+        default="http://localhost:3000,http://localhost:8080", alias="ALLOWED_ORIGINS"
+    )
 
+    @property
+    def cors_origins(self) -> list[str]:
+        """Parse allowed origins from comma-separated string"""
+        return [origin.strip() for origin in self.allowed_origins.split(",")]
 
     class Config:
         env_file = str(Path(__file__).parent.parent.parent / ".env")
         case_sensitive = False
+        extra = "ignore"  # Ignore extra fields from .env
 
 
 settings = Settings()
