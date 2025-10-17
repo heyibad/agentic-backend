@@ -51,7 +51,7 @@ A modern, **fully-functional** FastAPI backend for AI chatbot agents with comple
 
 ### Prerequisites
 
--   Python 3.13+
+-   Python 3.12+
 -   PostgreSQL database (or use [Neon](https://neon.tech) / [Supabase](https://supabase.com))
 -   UV package manager: `pip install uv`
 
@@ -67,7 +67,10 @@ cd agentic-backend
 ```powershell
 uv sync
 ```
-
+## Running the Application
+```powershell
+uv run uvicorn app.main:app --reload  --port 8080
+```
 ### 3. Configure environment
 
 ```powershell
