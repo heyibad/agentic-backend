@@ -219,3 +219,55 @@ async def _stream_agent_response(
     yield f"data: {done_chunk.model_dump_json()}\n\n"
 
 
+@router.post("/stream")
+async def chat_stream(
+    prompt: ChatPrompt,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if not prompt.text.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Message text cannot be empty",
+        )
+
+    conversation = await _resolve_conversation(prompt, db, current_user)
+
+    user_message = Message(
+        conversation_id=conversation.id,
+        author_id=prompt.author_id or current_user.id,
+        role=MessageRole.USER.value,
+        content=prompt.text,
+        status=MessageStatus.COMPLETED.value,
+        provider_meta=_build_message_metadata(prompt) or None,
+    )
+
+    assistant_message = Message(
+        conversation_id=conversation.id,
+        role=MessageRole.ASSISTANT.value,
+        content="",
+        status=MessageStatus.PENDING.value,
+    )
+
+    db.add(user_message)
+    db.add(assistant_message)
+    await db.flush()
+
+    # Extract IDs before commit to avoid lazy loading during streaming
+    conversation_id = conversation.id
+    user_message_id = user_message.id
+    assistant_message_id = assistant_message.id
+
+    await db.commit()
+
+    return StreamingResponse(
+        _stream_agent_response(
+            prompt, conversation_id, user_message_id, assistant_message_id, db
+        ),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",  # Disable nginx buffering
+        },
+    )
