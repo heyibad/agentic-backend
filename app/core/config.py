@@ -34,13 +34,13 @@ class Settings(BaseSettings):
         alias="GOOGLE_REDIRECT_URI",
     )
 
-    # Gemini AI (Google's AI)
-    gemini_api_key: Optional[str] = Field(default=None, alias="GEMINI_API_KEY")
-    gemini_base_url: str = Field(
+    # AI AGENT CONFIGURATION
+    api_key: str = Field(default="", alias="API_KEY")
+    api_base_url: str = Field(
         default="https://generativelanguage.googleapis.com/v1beta/openai/",
-        alias="GEMINI_BASE_URL",
+        alias="API_BASE_URL",
     )
-    gemini_model: str = Field(default="gemini-2.5-flash", alias="GEMINI_MODEL")
+    model: str = Field(default="gemini-2.5-flash", alias="MODEL")
 
     # CORS
     allowed_origins: str = Field(

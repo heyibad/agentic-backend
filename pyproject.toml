@@ -12,6 +12,7 @@ dependencies = [
     "fastapi[standard]>=0.118.0",
     "httpx>=0.28.1",
     "itsdangerous>=2.2.0",
+    "openai-agents>=0.3.3",
     "passlib[bcrypt]>=1.7.4",
     "psycopg2-binary>=2.9.10",
     "pydantic-settings>=2.11.0",
