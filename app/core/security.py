@@ -18,6 +18,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # PERFORMANCE OPTIMIZATION: Cache user lookups (key: user_id, value: (user, timestamp))
 # This prevents DB query on every request (was taking 12+ seconds!)
 from typing import Any
+
 _user_cache: dict[str, tuple[Any, float]] = {}
 _CACHE_TTL = 300  # 5 minutes
 
@@ -56,7 +57,7 @@ async def get_current_user(
 ):
     """
     Get current authenticated user from JWT token.
-    
+
     PERFORMANCE OPTIMIZATION: Uses in-memory cache to avoid DB query on every request.
     Cache TTL is 5 minutes. This reduces latency from 12,000ms to <10ms per request.
     """
@@ -84,7 +85,7 @@ async def get_current_user(
             cached_user, cached_time = _user_cache[user_id]
             if current_time - cached_time < _CACHE_TTL:
                 return cached_user
-        
+
         # Cache miss or expired - fetch from database
         user = await db.get(User, UUID(user_id))
         if user is None:
@@ -92,7 +93,7 @@ async def get_current_user(
 
         # Update cache
         _user_cache[user_id] = (user, current_time)
-        
+
         return user
 
     except ValueError:

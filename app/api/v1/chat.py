@@ -37,7 +37,7 @@ async def _resolve_conversation(
 ) -> Conversation:
     """
     Resolve or create conversation.
-    
+
     PERFORMANCE OPTIMIZATION: Uses indexed query for faster lookup.
     """
     if prompt.conversation_id:
@@ -49,7 +49,7 @@ async def _resolve_conversation(
         )
         result = await db.execute(stmt)
         conversation = result.scalar_one_or_none()
-        
+
         if not conversation:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found"
@@ -62,7 +62,7 @@ async def _resolve_conversation(
         title = last_content[:80] if last_content else None
     except ValueError:
         title = None
-    
+
     conversation = Conversation(
         user_id=current_user.id,
         title=title,
@@ -95,7 +95,7 @@ async def chat(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         )
-    
+
     if not last_message.strip():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -151,13 +151,13 @@ async def _stream_agent_response_optimized(
 ) -> AsyncIterator[str]:
     """
     ULTRA-OPTIMIZED: Stream AI agent response with ZERO blocking before first token.
-    
+
     PERFORMANCE IMPROVEMENTS:
     - Snapshot sent immediately (0ms)
     - DB commit happens in background during AI processing
     - Agent starts processing immediately
     - Total time to first token: <100ms (was 2000ms+)
-    
+
     Args:
         prompt: User input prompt
         conversation_data: Pre-fetched conversation data dict
@@ -184,7 +184,7 @@ async def _stream_agent_response_optimized(
     yield f"event: snapshot\ndata: {json.dumps(snapshot)}\n\n"
 
     conversation_id = UUID(conversation_data["id"])
-    
+
     # CRITICAL OPTIMIZATION: Commit in background while agent is thinking
     # This saves 400-1900ms of blocking time!
     if should_commit_on_start:
@@ -195,15 +195,17 @@ async def _stream_agent_response_optimized(
     try:
         # CRITICAL OPTIMIZATION: Start agent streaming immediately (main latency point)
         messages_input = prompt.get_messages_list()
-        stream = Runner.run_streamed(chat_agent, input=messages_input, run_config=config)
-        
+        stream = Runner.run_streamed(
+            chat_agent, input=messages_input, run_config=config
+        )
+
         # ULTRA-OPTIMIZED: Minimize JSON serialization overhead
         chunk_template = {
             "conversation_id": str(conversation_id),
             "message_id": str(assistant_message_id),
-            "done": False
+            "done": False,
         }
-        
+
         async for event in stream.stream_events():
             if event.type != "raw_response_event" or not isinstance(
                 event.data, ResponseTextDeltaEvent
@@ -213,12 +215,12 @@ async def _stream_agent_response_optimized(
             if not delta:
                 continue
             buffer.append(delta)
-            
+
             # ULTRA-OPTIMIZED: Minimal JSON - only send delta
             # Avoid model serialization overhead
             chunk_template["delta"] = delta
             yield f"data: {json.dumps(chunk_template)}\n\n"
-            
+
     except Exception as e:
         # Wait for background commit if it exists
         if commit_task:
@@ -226,7 +228,7 @@ async def _stream_agent_response_optimized(
                 await commit_task
             except Exception:
                 pass
-        
+
         # Update message status to failed (single DB query)
         assistant_msg = await db.get(Message, assistant_message_id)
         if assistant_msg:
@@ -281,7 +283,7 @@ async def chat_stream(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         )
-    
+
     if not last_message.strip():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -310,7 +312,7 @@ async def chat_stream(
 
     db.add(user_message)
     db.add(assistant_message)
-    
+
     # CRITICAL OPTIMIZATION: Only flush to get IDs, commit happens in background
     # This reduces pre-stream latency from 2000ms to ~100ms!
     await db.flush()
@@ -337,12 +339,12 @@ async def chat_stream(
     # Commit happens in first iteration of stream generator
     return StreamingResponse(
         _stream_agent_response_optimized(
-            prompt, 
+            prompt,
             conversation_data,
             user_message_data,
-            assistant_message_id, 
+            assistant_message_id,
             db,
-            should_commit_on_start=True  # Signal to commit in generator
+            should_commit_on_start=True,  # Signal to commit in generator
         ),
         media_type="text/event-stream",
         headers={

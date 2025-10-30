@@ -125,7 +125,7 @@ class ChatMessage(BaseModel):
 
 class ChatPrompt(BaseModel):
     """Input payload accepted by chat endpoints.
-    
+
     Supports two formats:
     1. Simple: { "text": "Hello", ... } - single message
     2. Messages array: { "messages": [{"role": "user", "content": "Hello"}], ... } - full conversation history
@@ -136,26 +136,29 @@ class ChatPrompt(BaseModel):
         description="Existing conversation to append to. When omitted, a new conversation should be created upstream.",
     )
     author_id: Optional[UUID] = None
-    
+
     # Support both simple text and messages array
     text: Optional[str] = Field(default=None, min_length=1, max_length=16000)
     messages: Optional[list[ChatMessage]] = Field(
         default=None,
         description="Full conversation history as message array. If provided, text field is ignored.",
     )
-    
+
     metadata: Optional[MessageMetadata] = None
     tags: list[str] = Field(default_factory=list)
-    
+
     def get_messages_list(self) -> list[dict[str, str]]:
         """Convert prompt to list of messages suitable for agents."""
         if self.messages:
-            return [{"role": msg.role.value, "content": msg.content} for msg in self.messages]
+            return [
+                {"role": msg.role.value, "content": msg.content}
+                for msg in self.messages
+            ]
         elif self.text:
             return [{"role": MessageRole.USER.value, "content": self.text}]
         else:
             raise ValueError("Either 'text' or 'messages' must be provided")
-    
+
     def get_last_message_content(self) -> str:
         """Get the content of the last user message."""
         if self.messages:
