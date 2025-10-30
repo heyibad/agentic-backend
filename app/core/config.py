@@ -30,7 +30,7 @@ class Settings(BaseSettings):
         default=None, alias="GOOGLE_CLIENT_SECRET"
     )
     google_redirect_uri: str = Field(
-        default="http://localhost:8080/api/v1/oauth/google/callback",
+        default="http://localhost:8000/api/v1/oauth/google/callback",
         alias="GOOGLE_REDIRECT_URI",
     )
 
@@ -44,7 +44,7 @@ class Settings(BaseSettings):
 
     # CORS
     allowed_origins: str = Field(
-        default="http://localhost:3000,http://localhost:8080", alias="ALLOWED_ORIGINS"
+        default="http://localhost:3000,http://localhost:8000", alias="ALLOWED_ORIGINS"
     )
 
     @property

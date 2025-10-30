@@ -50,7 +50,7 @@ def get_current_time() -> str:
 # Create an AI agent using OpenAI Agents SDK
 chat_agent = Agent(
     name="ChatAgent",
-    instructions="You are a helpful chatbot. Respond to user messages in a friendly and informative way. If the user asks for the time, use the get_current_time tool.",
+    instructions="You are a helpful chatbot.",
     tools=[get_current_time],  # Add the time tool
     model=model,
 )

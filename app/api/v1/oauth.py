@@ -27,8 +27,8 @@ async def google_login(request: Request):
     """
     from urllib.parse import urlencode
 
-    # Build redirect URI
-    redirect_uri = str(request.url_for("google_callback"))
+    # Use the configured redirect URI from settings
+    redirect_uri = settings.google_redirect_uri
 
     # Build Google OAuth URL manually to avoid state issues
     params = {
@@ -57,8 +57,8 @@ async def google_callback(
     try:
         import httpx
 
-        # Exchange code for tokens manually
-        redirect_uri = str(request.url_for("google_callback"))
+        # Exchange code for tokens manually - use the same redirect URI from settings
+        redirect_uri = settings.google_redirect_uri
 
         token_url = "https://oauth2.googleapis.com/token"
         token_data = {

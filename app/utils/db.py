@@ -49,11 +49,15 @@ if "sslmode" in query_params:
         )
     )
 
-# Create async engine
+# Create async engine with optimized connection pooling
 engine = create_async_engine(
     DATABASE_URL,
     echo=False,  # Set to False to reduce log noise
     future=True,
+    pool_size=20,  # Increased from default 5
+    max_overflow=40,  # Allow up to 60 total connections
+    pool_pre_ping=True,  # Verify connections before using
+    pool_recycle=3600,  # Recycle connections after 1 hour
     connect_args=connect_args,
 )
 
